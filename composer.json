@@ -1,0 +1,38 @@
+{
+    "name": "mike-bricknell-barlow/game-of-tennis",
+    "description": "A demonstration of tracking a game of tennis via PHP",
+    "type": "project",
+    "require": {
+        "php": "^8.4"
+    },
+    "require-dev": {
+        "pestphp/pest": "^2.0",
+        "phpstan/phpstan": "^1.11",
+        "laravel/pint": "^1.13"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "pest",
+        "analyse": "phpstan analyse",
+        "lint": "pint --test",
+        "format": "pint"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
