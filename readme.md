@@ -57,6 +57,16 @@ Run the test suite:
 
 `composer test`
 
+Current tests:
+
+ - If a game starts with a score of 'love all' (0, 0)
+ - If a representative mid-game score outputs a correctly formatted result
+ - If score is returned as 'deuce' when both players are on 'forty'
+ - If score is returned as 'advantage' when one player wins a round after 'deuce;
+ - If all possible score combinations are correctly returned
+ - If correct status is returned when a game ends
+ - If a game can be run from start to finish, with each round assigning a random winner
+
 ### PHPStan (static analysis)
 
 PHPStan is configured to analyse both source code and tests.
