@@ -1,86 +1,88 @@
-# Tennis Game Simulation
+# Tennis Scoring – Domain Model Overview
 
-This project implements a simple simulation of a single tennis game.
+## Purpose
 
-## Overview
+This updated implementation focuses on modelling the rules of tennis scoring as a small domain. The goal is to make the rules and state transitions easy to understand, test, and extend, and not overengineering out of proportion to the size of the problem.
 
-The Game class models the scoring rules of a single tennis game between two players. It tracks point progression, handles deuce and advantage states, and determines when a game has been won.
+## Domain Concepts
 
-## Usage
+### Score (Core Domain Model)
 
- - Clone the repo
- - Run `composer install`
- - See below for running tests
+The Score class is the main part of the solution and represents the current state of a single game.
 
-## Game class
+Key information:
 
-The Game class is responsible for:
+ - Immutable object
+    - A Score instance never changes once created. Each point won returns a new Score, making state transitions explicit and preventing accidental mutation.
+ - Rules encapsulated in the model
+    - All scoring rules, deuce, advantage, winning conditions, are handled by Score. The game cannot be put into an invalid state.
+ - Illegal states are prevented
+    - Scores cannot be negative
+    - Points cannot be awarded after the game has been won
+    - Advantage and deuce states are derived from point values rather than explicit flags
+ - Domain-driven language
+    - Methods such as pointWonBy, hasWinner, isDeuce, and isAdvantage reflect the language of tennis scoring instead of generic operations.
 
- - Tracking player scores internally
- - Translating numeric scores into tennis scoring terminology
- - Handling all valid score states:
-    - Love through forty
-    - Deuce
-    - Advantage
-    - Game win
- - Simulating a full game from start to finish
+This treats tennis scoring as a small state machine while avoiding the need for explicit state classes, which would add complexity without improving clarity at this scale.
 
-The public API:
+### Player (Domain Identifier)
 
-`start()`
-Resets the game and runs rounds until a winner is declared. Returns an array of score updates as strings.
+Player is represented as a small enum rather than a full entity.
 
-`run()`
-Executes the game loop and returns all intermediate score descriptions, ending with a win message.
+This choice was made deliberately:
 
-`getScore()`
-Returns a human-readable description of the current score.
+ - Players have no behaviour/attributes in this scenario
+ - Using an enum avoids magic numbers and improves readability
+ - Introducing a richer Player object would add complexity without value
 
-## Tests
+### ScoreLine (Presentation Boundary)
 
-The test suite is written using Pest.
+ScoreLine is responsible for converting a Score into a human-readable description.
 
-The tests cover:
+Separating this logic from Score:
 
- - All distinct tennis score states, including extended deuce and advantage scenarios
- - Correct score descriptions for tied and non-tied states
- - Full game simulation from start to end
- - Verification that a game always ends with a valid win message for either player
+ - Keeps the domain model free of presentation
+ - Makes it easier to change output formatting independently of scoring rules
+ - Defines a clear boundary between logic and output
 
-## Tooling and code quality
+### Game (Thin Orchestration)
 
-This project includes common PHP tooling to demonstrate code quality practices.
+The optional Game class acts as a coordinator:
 
-### Pest (unit tests)
+ - It holds the current Score
+ - It forwards domain events (pointWonBy)
+ - It exposes the current score line
 
-Run the test suite:
+All business rules remain in the Score model, with game containing no scoring logic.
 
-`composer test`
+## Testing Approach
 
-Current tests:
+Tests drive the domain by modelling how points are won.
 
- - If a game starts with a score of 'love all' (0, 0)
- - If a representative mid-game score outputs a correctly formatted result
- - If score is returned as 'deuce' when both players are on 'forty'
- - If score is returned as 'advantage' when one player wins a round after 'deuce;
- - If all possible score combinations are correctly returned
- - If correct status is returned when a game ends
- - If a game can be run from start to finish, with each round assigning a random winner
+Key information:
 
-### PHPStan (static analysis)
+ - Tests interact only with public APIs
+ - Transitions such as deuce, advantage, and win are reached through realistic sequences of points
+ - Illegal actions are explicitly tested
 
-PHPStan is configured to analyse both source code and tests.
+## Deliberate Omissions
 
-Run the analysis:
+Several things were intentionally not included:
 
-`composer analyse`
+ - Randomised gameplay or simulation loops
+    - The focus is on modelling scoring rules, not simulating matches.
+ - Explicit state classes (e.g. DeuceState, AdvantageState)
+    - These would not add much clarity for this problem size, but would increase complexity.
+ - Player objects
+    - Players are interchangeable and have no domain behaviour in this exercise.
+ - Persistence, e.g. set or match-level scoring
+    - These would be natural extensions, but are outside the scope of the exercise
 
-### Pint (linting and formatting)
+## Summary
 
-Check code style without modification:
+This design prioritises:
 
-`composer lint`
-
-Automatically format code:
-
-`composer format`
+ - Clear domain language
+ - Explicit, testable state transitions
+ - Prevention of invalid states
+ - Proportional complexity
